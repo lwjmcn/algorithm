@@ -1,11 +1,12 @@
 #include <iostream>
+#include <vector>
 #include <algorithm>
 using namespace std;
 
 int n, m;
-int a[1000005];
-int b[1000005];
-int ab[2000005];
+vector<int> a; // 100만 길이의 int 배열은 선언할 수 없다
+vector<int> b;
+vector<int> ab;
 
 void divideAndConquer()
 {
@@ -18,19 +19,19 @@ void divideAndConquer()
     {
       if (bi >= m)
         return;
-      ab[ai + bi] = b[bi++];
+      ab.push_back(b[bi++]);
     }
     while (bi >= m)
     {
       if (ai >= n)
         return;
-      ab[ai + bi] = a[ai++];
+      ab.push_back(a[ai++]);
     }
 
     if (a[ai] < b[bi])
-      ab[ai + bi] = a[ai++];
+      ab.push_back(a[ai++]);
     else
-      ab[ai + bi] = b[bi++];
+      ab.push_back(b[bi++]);
   }
 }
 int main()
@@ -39,19 +40,19 @@ int main()
   cin.tie(0);
   cout.tie(0);
 
-  freopen("../input.txt", "r", stdin);
+  // freopen("../input.txt", "r", stdin);
 
   cin >> n >> m;
   int k;
   for (int i = 0; i < n; i++)
   {
     cin >> k;
-    a[i] = k;
+    a.push_back(k);
   }
   for (int i = 0; i < m; i++)
   {
     cin >> k;
-    b[i] = k;
+    b.push_back(k);
   }
 
   divideAndConquer();
