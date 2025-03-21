@@ -2,58 +2,59 @@
 #include <algorithm>
 #include <vector>
 using namespace std;
+typedef long long ll;
 
 int n;
-pair<int, int> a[500005];
+pair<int, int> a[500005]; // value, index
 // bubble sort의 swap 개수 -> 어떤 수열값에 대하여 오른쪽에 그보다 작은 값의 개수를 세면 됨
 // segment tree 풀이 참고: https://loosie.tistory.com/328
-// vector<int> 중복값 처리
-pair<int, vector<int>> segtree; // a[], count of smaller nums on the right side
 
-// void dividenconquer()
-// {
-//   int i = n - 1;
+// 작은 숫자부터 segment tree에 +1로 업데이트한다
+// segment tree 노드 값은 지금까지 센 숫자의 개수임
+// a[3]에 대하여 오른쪽~~~ 값을 구한다고 할 때, [4:end] 구간합 쿼리를 하면 됨!!!
 
-//   while (1)
-//   {
-//     for (int j = i + 1; j < n; j++)
-//     {
-//       if (a[j] >= a[i])
-//       {
-//         segtree[j + n] =
-//       }
-//     }
+ll segtree[2000005]; // a[], count of smaller nums on the right side
 
-//     segtree[i + n] = {a[i], 0};
-//     i--;
-//   }
+ll init(int cur, int start, int end)
+{
+  if (start == end)
+    return 0;
 
-//   for (int i = n - 2; i >= 0; i--) // from the right side
-//   {
-//     cout << "a[i] " << a[i] << "\n";
-//     for (int j = i + 1; j < n; j++) // nums on the right side of i
-//     {
-//       cout << "a[j] " << a[j] << "\n";
-//       if (dp.find(j) == dp.end())
-//       {
-//         if (a[j] < a[i])
-//         {
-//           cout << "dp[a[i]]++" << "\n";
-//           dp[i]++;
-//         }
-//       }
-//       else
-//       {
-//         if (a[j] < a[i])
-//         {
-//           cout << "dp[a[i]] = dp[a[j]]+1" << "\n";
-//           dp[i] += (dp[j] + 1);
-//         }
-//       }
-//     }
-//     cout << "\n";
-//   }
-// }
+  int mid = (start + end) / 2;
+  ll left = init(cur * 2, start, mid);
+  ll right = init(cur * 2 + 1, mid + 1, end);
+
+  return segtree[cur] = left + right;
+}
+
+ll range_query(int cur, int start, int end, int left_query, int right_query)
+{
+  if (left_query > end || right_query < start)
+    return 0;
+
+  if (left_query <= start && right_query >= end)
+    return segtree[cur];
+
+  int mid = (start + end) / 2;
+  ll left = range_query(cur * 2, start, mid, left_query, right_query);
+  ll right = range_query(cur * 2 + 1, mid + 1, end, left_query, right_query);
+
+  return left + right;
+}
+void update(int cur, int start, int end, int index, int diff)
+{
+  if (index < start || index > end)
+    return;
+
+  segtree[cur] += diff;
+
+  if (start == end)
+    return;
+
+  int mid = (start + end) / 2;
+  update(cur * 2, start, mid, index, diff);
+  update(cur * 2 + 1, mid + 1, end, index, diff);
+}
 
 int main()
 {
@@ -61,24 +62,33 @@ int main()
   cin.tie(0);
   cout.tie(0);
 
-  freopen("../input.txt", "r", stdin);
+  // freopen("../input.txt", "r", stdin);
 
   cin >> n;
-  for (int i = 0; i < n; i++)
+  for (int i = 1; i <= n; i++)
   {
     int k;
     cin >> k;
-    a[i] = {i, k}; // index, value
+    a[i] = {k, i}; // value, index
   }
-  sort(a, a + n);
+  sort(a + 1, a + n + 1); // value기준 sort
 
-  // dividenconquer();
+  init(1, 1, n);
 
-  int ans = 0;
-  for (int i = 0; i < n; i++)
+  ll ans = 0;
+  for (int i = 1; i <= n; i++)
   {
-    //
+    // cout << a[i].first << " " << a[i].second << "\n";
+    ans += range_query(1, 1, n, a[i].second + 1, n);
+    update(1, 1, n, a[i].second, 1);
+
+    // for (int i = 0; i < 4 * n; i++)
+    // {
+    //   cout << segtree[i] << " ";
+    // }
+    // cout << "\n";
   }
+
   cout << ans;
 
   // 채점 전 freopen 주석 처리 할 것
